@@ -5,7 +5,7 @@ import { MdAdd } from "react-icons/md";
 import AddEditNotes from "./AddEditNote";
 import { useNavigate } from "react-router-dom";
 import Modal from "react-modal";
-import axiosInstance from './../../utils/axiosInstance';
+import axiosInstance from "./../../utils/axiosInstance";
 import Toast from "../../components/ToastMessage/Toast";
 import EmptyNotes from "../../components/EmptyNotes/EmptyNotes";
 import AddNotesImg from "../../assets/images/add-notes.svg";
@@ -38,14 +38,14 @@ const Home = () => {
     setShowToastMsg({
       isShown: true,
       message,
-      type
+      type,
     });
   };
 
   const handleCloseToast = () => {
     setShowToastMsg({
       isShown: false,
-      message: ""
+      message: "",
     });
   };
 
@@ -106,9 +106,12 @@ const Home = () => {
   const updateIsPinned = async (noteData) => {
     const noteId = noteData._id;
     try {
-      const response = await axiosInstance.put("/update-note-pinned/" + noteId, {
-        isPinned: !noteData.isPinned,
-      });
+      const response = await axiosInstance.put(
+        "/update-note-pinned/" + noteId,
+        {
+          isPinned: !noteData.isPinned,
+        }
+      );
       if (response.data && response.data.note) {
         showToastMessage("Task Pinned Successfully");
         getAllNotes();
@@ -171,10 +174,11 @@ const Home = () => {
           setOpenAddEditModel({ isShown: true, type: "add", data: null });
         }}
       >
-        <MdAdd className="text-2xl md:text-3xl text-white" />
+        <MdAdd />
       </button>
 
       <Modal
+        className=" w-[80%] m-auto max-w-[500px]  py-8 rounded-[8px] mt-20 border-none p-[16px] bg-white"
         isOpen={openAddEditModel.isShown}
         onRequestClose={() => {}}
         style={{
@@ -182,13 +186,7 @@ const Home = () => {
             backgroundColor: "rgba(0, 0, 0, 0.5)",
           },
           content: {
-            width: '95%',
-            maxWidth: '500px',
-            margin: 'auto',
-            borderRadius: '8px',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-            border: 'none',
-            padding: '16px',
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
           },
         }}
         contentLabel="Add/Edit Note"
