@@ -138,7 +138,7 @@ const Home = () => {
 
       <div className="container mx-auto px-4 py-8">
         {allNotes.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {allNotes.map((item) => (
               <NoteCard
                 key={item._id}
@@ -166,12 +166,12 @@ const Home = () => {
       </div>
 
       <button
-        className="fixed right-8 bottom-8 w-16 h-16 flex items-center justify-center rounded-full bg-teal-500 hover:bg-teal-600 transition-colors duration-300 shadow-lg"
+        className="fixed right-4 bottom-4 md:right-8 md:bottom-8 w-12 h-12 md:w-16 md:h-16 flex items-center justify-center rounded-full bg-teal-500 hover:bg-teal-600 transition-colors duration-300 shadow-lg"
         onClick={() => {
           setOpenAddEditModel({ isShown: true, type: "add", data: null });
         }}
       >
-        <MdAdd className="text-3xl text-white" />
+        <MdAdd className="text-2xl md:text-3xl text-white" />
       </button>
 
       <Modal
@@ -182,12 +182,13 @@ const Home = () => {
             backgroundColor: "rgba(0, 0, 0, 0.5)",
           },
           content: {
-            width: '90%',
+            width: '95%',
             maxWidth: '500px',
             margin: 'auto',
             borderRadius: '8px',
             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
             border: 'none',
+            padding: '16px',
           },
         }}
         contentLabel="Add/Edit Note"
