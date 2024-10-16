@@ -55,12 +55,12 @@ const Home = () => {
       if (response.data && response.data.user) {
         setUserInfo(response.data.user);
       } else {
-        navigate("/login");  // Redirect if no user data found
+        navigate("/login");
       }
     } catch (error) {
       if (error.response && error.response.status === 401) {
         localStorage.clear();
-        navigate("/login");  // Redirect to login if unauthorized
+        navigate("/login");
       }
     }
   };
@@ -159,7 +159,7 @@ const Home = () => {
             message={
               isSearch
                 ? "Oops! No Tasks found"
-                :"Click the 'Add' Button to jot down your ideas, thoughts, and reminders. Let's get started!"
+                : "Click the 'Add' Button to jot down your ideas, thoughts, and reminders. Let's get started!"
             }
           />
         )}

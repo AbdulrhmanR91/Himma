@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../../components/Navbar.jsx/Navbar';
 import { Link, useNavigate } from 'react-router-dom';
 import PasswordInput from '../../components/Input/PasswordInput';
@@ -11,6 +11,13 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      navigate('/dashboard');
+    }
+  }, [navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -50,7 +57,6 @@ const Login = () => {
       <Navbar />
       <div className="flex items-center justify-center mt-20">
         <div className="flex w-full max-w-4xl bg-white rounded-lg shadow-xl overflow-hidden">
-          {/* Image Section */}
           <div className="hidden md:block w-1/2">
             <img 
               src={loginImage} 
@@ -59,7 +65,6 @@ const Login = () => {
             />
           </div>
           
-          {/* Form Section */}
           <div className="w-full md:w-1/2 p-8">
             <form onSubmit={handleLogin} className="space-y-6">
               <h2 className="text-3xl font-bold text-center text-teal-600 mb-8">Login to همّة - Himma</h2>

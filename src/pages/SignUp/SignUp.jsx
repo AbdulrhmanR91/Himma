@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../../components/Navbar.jsx/Navbar';
 import PasswordInput from '../../components/Input/PasswordInput';
 import { Link, useNavigate } from 'react-router-dom';
 import { validateEmail } from '../../utils/helper';
 import axiosInstance from '../../utils/axiosInstance';
-import loginImage from '../../assets/images/login.svg';  // استيراد الصورة
+import loginImage from '../../assets/images/login.svg';
 
 const SignUp = () => {
   const [name, setName] = useState("");
@@ -12,6 +12,13 @@ const SignUp = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      navigate('/dashboard');
+    }
+  }, [navigate]);
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -60,16 +67,13 @@ const SignUp = () => {
       <Navbar />
       <div className="flex items-center justify-center mt-20">
         <div className="flex w-full max-w-4xl bg-white rounded-lg shadow-xl overflow-hidden">
-          {/* Image Section */}
           <div className="hidden md:block w-1/2">
             <img 
               src={loginImage}
-              alt="Sign Up" 
-              className="object-cover w-full h-full"
+              alt="Sign Up"  className="object-cover w-full h-full"
             />
           </div>
           
-          {/* Form Section */}
           <div className="w-full md:w-1/2 p-8">
             <form onSubmit={handleSignUp} className="space-y-6">
               <h2 className="text-3xl font-bold text-center text-teal-600 mb-8">Sign Up for همّة - Himma</h2>
