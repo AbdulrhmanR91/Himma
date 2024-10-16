@@ -129,6 +129,7 @@ const Home = () => {
   useEffect(() => {
     getUserInfo();
     getAllNotes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

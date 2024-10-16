@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import Navbar from '../../components/Navbar.jsx/Navbar';
-import { Link, useNavigate } from 'react-router-dom';
-import PasswordInput from '../../components/Input/PasswordInput';
-import { validateEmail } from '../../utils/helper';
-import axiosInstance from '../../utils/axiosInstance';
-import loginImage from '../../assets/images/login.svg';
+import React, { useState, useEffect } from "react";
+import Navbar from "../../components/Navbar.jsx/Navbar";
+import { Link, useNavigate } from "react-router-dom";
+import PasswordInput from "../../components/Input/PasswordInput";
+import { validateEmail } from "../../utils/helper";
+import axiosInstance from "../../utils/axiosInstance";
+import loginImage from "../../assets/images/login.svg";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -13,9 +13,9 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
-      navigate('/dashboard');
+      navigate("/dashboard");
     }
   }, [navigate]);
 
@@ -32,19 +32,23 @@ const Login = () => {
     }
 
     setError("");
-    
+
     try {
-      const response = await axiosInstance.post('/login', {
+      const response = await axiosInstance.post("/login", {
         email: email,
         password: password,
       });
 
       if (response.data && response.data.accessToken) {
-        localStorage.setItem('token', response.data.accessToken);
-        navigate('/dashboard');
+        localStorage.setItem("token", response.data.accessToken);
+        navigate("/dashboard");
       }
     } catch (error) {
-      if (error.response && error.response.data && error.response.data.message) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
         setError(error.response.data.message);
       } else {
         setError("An unexpected error occurred. Please try again later");
@@ -55,22 +59,29 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-50">
       <Navbar />
-      <div className="flex items-center justify-center mt-20">
-        <div className="flex w-full max-w-4xl bg-white rounded-lg shadow-xl overflow-hidden">
+      <div className=" flex items-center justify-center mt-20">
+        <div className="flex w-[90%] max-w-4xl bg-white rounded-lg shadow-xl overflow-hidden">
           <div className="hidden md:block w-1/2">
-            <img 
-              src={loginImage} 
-              alt="Login" 
+            <img
+              src={loginImage}
+              alt="Login"
               className="object-cover w-full h-full"
             />
           </div>
-          
+
           <div className="w-full md:w-1/2 p-8">
             <form onSubmit={handleLogin} className="space-y-6">
-              <h2 className="text-3xl font-bold text-center text-teal-600 mb-8">Login to همّة - Himma</h2>
-              
+              <h2 className="text-3xl font-bold text-center text-teal-600 mb-8">
+                Login to همّة - Himma
+              </h2>
+
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Email
+                </label>
                 <input
                   type="text"
                   id="email"
@@ -83,7 +94,12 @@ const Login = () => {
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Password
+                </label>
                 <PasswordInput
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -102,7 +118,10 @@ const Login = () => {
 
               <p className="text-sm text-center text-gray-600">
                 Not registered yet?{" "}
-                <Link to="/signup" className="font-medium text-teal-600 hover:text-teal-500">
+                <Link
+                  to="/signup"
+                  className="font-medium text-teal-600 hover:text-teal-500"
+                >
                   Create an Account
                 </Link>
               </p>
