@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import Navbar from '../../components/Navbar.jsx/Navbar';
-import PasswordInput from '../../components/Input/PasswordInput';
-import { Link, useNavigate } from 'react-router-dom';
-import { validateEmail } from '../../utils/helper';
-import axiosInstance from '../../utils/axiosInstance';
-import loginImage from '../../assets/images/login.svg';
+import React, { useState, useEffect } from "react";
+import Navbar from "../../components/Navbar.jsx/Navbar";
+import PasswordInput from "../../components/Input/PasswordInput";
+import { Link, useNavigate } from "react-router-dom";
+import { validateEmail } from "../../utils/helper";
+import axiosInstance from "../../utils/axiosInstance";
+import loginImage from "../../assets/images/login.svg";
 
 const SignUp = () => {
   const [name, setName] = useState("");
@@ -14,9 +14,9 @@ const SignUp = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
-      navigate('/dashboard');
+      navigate("/dashboard");
     }
   }, [navigate]);
 
@@ -38,7 +38,7 @@ const SignUp = () => {
     setError("");
 
     try {
-      const response = await axiosInstance.post('/create-account', {
+      const response = await axiosInstance.post("/create-account", {
         fullName: name,
         email: email,
         password: password,
@@ -50,11 +50,15 @@ const SignUp = () => {
       }
 
       if (response.data && response.data.accessToken) {
-        localStorage.setItem('token', response.data.accessToken);
-        navigate('/dashboard');
+        localStorage.setItem("token", response.data.accessToken);
+        navigate("/dashboard");
       }
     } catch (error) {
-      if (error.response && error.response.data && error.response.data.message) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
         setError(error.response.data.message);
       } else {
         setError("An unexpected error occurred. Please try again later");
@@ -66,20 +70,28 @@ const SignUp = () => {
     <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-50">
       <Navbar />
       <div className="flex items-center justify-center mt-20">
-        <div className="flex w-full max-w-4xl bg-white rounded-lg shadow-xl overflow-hidden">
+        <div className="flex w-[90%] max-w-4xl bg-white rounded-lg shadow-xl overflow-hidden">
           <div className="hidden md:block w-1/2">
-            <img 
+            <img
               src={loginImage}
-              alt="Sign Up"  className="object-cover w-full h-full"
+              alt="Sign Up"
+              className="object-cover w-full h-full"
             />
           </div>
-          
+
           <div className="w-full md:w-1/2 p-8">
             <form onSubmit={handleSignUp} className="space-y-6">
-              <h2 className="text-3xl font-bold text-center text-teal-600 mb-8">Sign Up for همّة - Himma</h2>
-              
+              <h2 className="text-3xl font-bold text-center text-teal-600 mb-8">
+                Sign Up for همّة - Himma
+              </h2>
+
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Name
+                </label>
                 <input
                   type="text"
                   id="name"
@@ -92,7 +104,12 @@ const SignUp = () => {
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Email
+                </label>
                 <input
                   type="text"
                   id="email"
@@ -105,7 +122,12 @@ const SignUp = () => {
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Password
+                </label>
                 <PasswordInput
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -124,7 +146,10 @@ const SignUp = () => {
 
               <p className="text-sm text-center text-gray-600">
                 Already have an account?{" "}
-                <Link to="/login" className="font-medium text-teal-600 hover:text-teal-500">
+                <Link
+                  to="/login"
+                  className="font-medium text-teal-600 hover:text-teal-500"
+                >
                   Log In
                 </Link>
               </p>

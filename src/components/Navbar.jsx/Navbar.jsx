@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import ProfileInfo from '../Cards/ProfileInfo';
-import { useNavigate } from 'react-router-dom';
-import SearchBar from '../SearchBar/SearchBar';
+import React, { useState } from "react";
+import ProfileInfo from "../Cards/ProfileInfo";
+import { useNavigate, Link } from "react-router-dom";
+import SearchBar from "../SearchBar/SearchBar";
 
 const Navbar = ({ userInfo, onSearchNote, handleClearSearch }) => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -28,16 +28,20 @@ const Navbar = ({ userInfo, onSearchNote, handleClearSearch }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex-shrink-0">
-            <h2 className="text-2xl font-bold text-teal-600">همّة - Himma</h2>
+            <h2 className="md:text-2xl text-lg font-bold text-teal-600">
+              <Link to={`/`}> همّة - Himma</Link>
+            </h2>
           </div>
           <div className="flex-1 flex justify-center px-2 lg:ml-6 lg:justify-end">
             <div className="max-w-lg w-full lg:max-w-xs">
-              <SearchBar
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                handleSearch={handleSearch}
-                onClearSearch={onClearSearch}
-              />
+              {localStorage.getItem("token") && (
+                <SearchBar
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  handleSearch={handleSearch}
+                  onClearSearch={onClearSearch}
+                />
+              )}
             </div>
           </div>
           <div className="ml-4 flex items-center md:ml-6">

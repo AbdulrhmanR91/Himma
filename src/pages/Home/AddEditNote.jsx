@@ -3,7 +3,13 @@ import TagInput from "../../components/Input/TagInput";
 import { MdClose } from "react-icons/md";
 import axiosInstance from "../../utils/axiosInstance";
 
-const AddEditNotes = ({ noteData, type, getAllNotes, onclose, showToastMessage }) => {
+const AddEditNotes = ({
+  noteData,
+  type,
+  getAllNotes,
+  onclose,
+  showToastMessage,
+}) => {
   const [title, setTitle] = useState(noteData?.title || "");
   const [content, setContent] = useState(noteData?.content || "");
   const [tags, setTags] = useState(noteData?.tags || []);
@@ -14,7 +20,7 @@ const AddEditNotes = ({ noteData, type, getAllNotes, onclose, showToastMessage }
       const response = await axiosInstance.post("/add-note", {
         title,
         content,
-        tags
+        tags,
       });
 
       if (response.data && response.data.note) {
@@ -23,7 +29,11 @@ const AddEditNotes = ({ noteData, type, getAllNotes, onclose, showToastMessage }
         onclose();
       }
     } catch (error) {
-      if (error.response && error.response.data && error.response.data.message) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
         setError(error.response.data.message);
       }
     }
@@ -35,7 +45,7 @@ const AddEditNotes = ({ noteData, type, getAllNotes, onclose, showToastMessage }
       const response = await axiosInstance.put("/edit-note/" + noteId, {
         title,
         content,
-        tags
+        tags,
       });
 
       if (response.data && response.data.note) {
@@ -44,7 +54,11 @@ const AddEditNotes = ({ noteData, type, getAllNotes, onclose, showToastMessage }
         onclose();
       }
     } catch (error) {
-      if (error.response && error.response.data && error.response.data.message) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
         setError(error.response.data.message);
       }
     }
@@ -60,7 +74,7 @@ const AddEditNotes = ({ noteData, type, getAllNotes, onclose, showToastMessage }
       return;
     }
     setError("");
-    if (type === 'edit') {
+    if (type === "edit") {
       editNote();
     } else {
       addNewNote();
@@ -68,7 +82,7 @@ const AddEditNotes = ({ noteData, type, getAllNotes, onclose, showToastMessage }
   };
 
   return (
-    <div className="relative">
+    <div className="relative ">
       <button
         className="absolute -top-2 -right-2 w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 transition-colors duration-200"
         onClick={onclose}
@@ -82,7 +96,9 @@ const AddEditNotes = ({ noteData, type, getAllNotes, onclose, showToastMessage }
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Title
+          </label>
           <input
             type="text"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
@@ -93,7 +109,9 @@ const AddEditNotes = ({ noteData, type, getAllNotes, onclose, showToastMessage }
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Content</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Content
+          </label>
           <textarea
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
             placeholder="Enter task details"
@@ -104,7 +122,9 @@ const AddEditNotes = ({ noteData, type, getAllNotes, onclose, showToastMessage }
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Tags
+          </label>
           <TagInput tags={tags} setTags={setTags} />
         </div>
 
