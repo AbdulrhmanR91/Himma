@@ -126,6 +126,21 @@ const Home = () => {
     getAllNotes();
   };
 
+  const onTagSearch = async (tagString) => {
+    try {
+      const response = await axiosInstance.get("/search-notes-by-tags", {
+        params: { tags: tagString },
+      });
+      if (response.data && response.data.notes) {
+        setIsSearch(true);
+        setAllNotes(response.data.notes);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+
   useEffect(() => {
     getUserInfo();
     getAllNotes();
@@ -137,6 +152,7 @@ const Home = () => {
       <Navbar
         userInfo={userInfo}
         onSearchNote={onSearchNote}
+        onTagSearch={onTagSearch}
         handleClearSearch={handleClearSearch}
       />
 

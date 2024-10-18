@@ -4,7 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login/Login";
 import SignUp from "./pages/SignUp/SignUp";
 import PrivateRoute from "./components/PrivateRoute";
-import Navbar from "./components/Navbar.jsx/Navbar";
+
 
 function App() {
   return (
