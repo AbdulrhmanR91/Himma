@@ -80,6 +80,7 @@ const Navbar = ({ userInfo, onSearchNote, onTagSearch, onStatusSearch, handleCle
                     onTagSearch={handleTagSearch}
                     onStatusSearch={handleStatusSearch}
                     onClearSearch={onClearSearch}
+                    keepSearchOpen={(open) => setIsSearchVisible(open)} // Keep search bar open
                   />
                 )}
               </div>
@@ -134,6 +135,7 @@ const Navbar = ({ userInfo, onSearchNote, onTagSearch, onStatusSearch, handleCle
             onTagSearch={handleTagSearch}
             onStatusSearch={handleStatusSearch}
             onClearSearch={onClearSearch}
+            keepSearchOpen={(open) => setIsSearchVisible(open)} // Keep search bar open
           />
         </div>
       )}

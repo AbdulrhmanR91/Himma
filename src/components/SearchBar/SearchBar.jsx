@@ -4,13 +4,16 @@ import { IoMdClose } from "react-icons/io";
 import { MdLabel } from "react-icons/md";
 import { TbLayoutKanban } from "react-icons/tb";
 
-const SearchBar = ({ value, onChange, handleSearch, onClearSearch, onTagSearch, onStatusSearch }) => {
+// SearchBar component
+const SearchBar = ({ value, onChange, handleSearch, onClearSearch, onTagSearch, onStatusSearch, keepSearchOpen }) => {
   const [searchMode, setSearchMode] = useState('text'); // State to manage the current search mode
 
   // Function to toggle the search mode and clear the current search
   const toggleSearchMode = (mode) => {
     setSearchMode(mode);
     onClearSearch();
+    // Keep the search bar open
+    keepSearchOpen(true);
   };
 
   // Function to handle key press events, specifically the Enter key
