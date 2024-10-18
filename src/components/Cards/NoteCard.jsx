@@ -1,16 +1,45 @@
+// Importing necessary libraries and components
 import React from 'react';
 import moment from 'moment';
 import { MdOutlinePushPin, MdCreate, MdDelete } from "react-icons/md";
 
-const NoteCard = ({ title, date, content, tags, isPinned, onEdit, onDelete, onPinNote }) => {
+// NoteCard component definition that takes various props
+const NoteCard = ({
+  title, // Title of the note
+  date,  // Date when the note was created
+  content, // Content of the note
+  tags,  // Tags associated with the note
+  isPinned,  // Boolean to check if the note is pinned
+  status, // Status of the note (pending, in progress, completed)
+  onEdit,  // Function to trigger when editing the note
+  onDelete, // Function to trigger when deleting the note
+  onPinNote,  // Function to trigger when pinning the note
+  onStatusChange // Function to trigger when status changes
+}) => {
+
+  // Function to return a CSS class based on the note's status
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'in progress':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'completed':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
   return (
+    // Note card container with styles for hover effects and layout
     <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
       <div className="p-4">
+        {/* Header section with title, date, and pin button */}
         <div className="flex items-center justify-between mb-2">
           <div>
             <h6 className="text-lg font-semibold text-gray-800">{title}</h6>
             <span className="text-xs text-gray-500">{moment(date).format("DD MMM YYYY")}</span>
           </div>
+          {/* Pin button to toggle pinned state */}
           <button
             onClick={onPinNote}
             className={`p-1 rounded-full ${isPinned ? 'bg-teal-100 text-teal-600' : 'bg-gray-100 text-gray-400'} hover:bg-teal-200 transition-colors duration-200`}
@@ -19,17 +48,33 @@ const NoteCard = ({ title, date, content, tags, isPinned, onEdit, onDelete, onPi
           </button>
         </div>
 
+        {/* Note content and description */}
         <p className="text-sm text-gray-600 mb-3 line-clamp-3">{content}</p>
 
+        {/* Section for displaying tags and status dropdown */}
         <div className="flex items-center justify-between">
-          <div className="flex flex-wrap gap-1">
-            {tags.map((tag, index) => (
-              <span key={index} className="text-xs bg-teal-100 text-teal-800 px-2 py-1 rounded">
-                #{tag}
-              </span>
-            ))}
+          <div className="flex flex-col gap-2">
+            {/* Tag section */}
+            <div className="flex flex-wrap gap-1">
+              {tags.map((tag, index) => (
+                <span key={index} className="text-xs bg-teal-100 text-teal-800 px-2 py-1 rounded">
+                  #{tag}
+                </span>
+              ))}
+            </div>
+            {/* Dropdown to change note status */}
+            <select
+              value={status}
+              onChange={(e) => onStatusChange(e.target.value)}
+              className={`text-xs px-2 py-1 rounded border-none cursor-pointer ${getStatusColor(status)}`}
+            >
+              <option value="pending">Pending</option>
+              <option value="in progress">In Progress</option>
+              <option value="completed">Completed</option>
+            </select>
           </div>
 
+          {/* Action buttons for editing and deleting the note */}
           <div className="flex items-center gap-2">
             <button
               onClick={onEdit}

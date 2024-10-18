@@ -2,22 +2,54 @@ import React, { useState } from "react";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { IoMdClose } from "react-icons/io";
 import { MdLabel } from "react-icons/md";
+import { TbLayoutKanban } from "react-icons/tb";
 
-const SearchBar = ({ value, onChange, handleSearch, onClearSearch, onTagSearch }) => {
-  const [isTagSearch, setIsTagSearch] = useState(false);
+const SearchBar = ({ value, onChange, handleSearch, onClearSearch, onTagSearch, onStatusSearch  }) => {
+  const [searchMode, setSearchMode] = useState('text'); // 'text', 'tag', or 'status'
 
-  const toggleSearchMode = () => {
-    setIsTagSearch(!isTagSearch);
+  const toggleSearchMode = (mode) => {
+    setSearchMode(mode);
     onClearSearch();
   };
 
+
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
-      if (isTagSearch) {
-        onTagSearch(e.target.value);
-      } else {
-        handleSearch();
+      switch(searchMode) {
+        case 'tag':
+          onTagSearch(value);
+          break;
+        case 'status':
+          onStatusSearch(value);
+          break;
+        default:
+          handleSearch();
       }
+    }
+  };
+
+
+  const getPlaceholder = () => {
+    switch(searchMode) {
+      case 'tag':
+        return "Search by tags (comma separated)";
+      case 'status':
+        return "Search by status (pending, in progress, completed)";
+      default:
+        return "Search Notes";
+    }
+  };
+
+  const handleSearchClick = () => {
+    switch(searchMode) {
+      case 'tag':
+        onTagSearch(value);
+        break;
+      case 'status':
+        onStatusSearch(value);
+        break;
+      default:
+        handleSearch();
     }
   };
 
@@ -29,7 +61,7 @@ const SearchBar = ({ value, onChange, handleSearch, onClearSearch, onTagSearch }
           value={value}
           onChange={onChange}
           onKeyDown={handleKeyPress}
-          placeholder={isTagSearch ? "Search by tags (comma separated)" : "Search Notes"}
+          placeholder={getPlaceholder()}
           className="w-full text-xs bg-transparent py-[11px] outline-none"
         />
         {value && (
@@ -42,17 +74,27 @@ const SearchBar = ({ value, onChange, handleSearch, onClearSearch, onTagSearch }
       
       <button
         className={`p-2 mr-2 rounded-full transition-colors ${
-          isTagSearch ? 'bg-teal-500 text-white' : 'text-slate-600 hover:text-black'
+          searchMode === 'tag' ? 'bg-teal-500 text-white' : 'text-slate-600 hover:text-black'
         }`}
-        onClick={toggleSearchMode}
-        title={isTagSearch ? "Switch to text search" : "Switch to tag search"}
+        onClick={() => toggleSearchMode('tag')}
+        title="Switch to tag search"
       >
         <MdLabel />
+      </button>
+
+      <button
+        className={`p-2 mr-2 rounded-full transition-colors ${
+          searchMode === 'status' ? 'bg-teal-500 text-white' : 'text-slate-600 hover:text-black'
+        }`}
+        onClick={() => toggleSearchMode('status')}
+        title="Switch to status search"
+      >
+        <TbLayoutKanban />
       </button>
       
       <FaMagnifyingGlass
         className="cursor-pointer text-slate-600 hover:text-black"
-        onClick={() => isTagSearch ? onTagSearch(value) : handleSearch()}
+        onClick={handleSearchClick}
       />
     </div>
   );
