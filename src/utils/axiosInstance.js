@@ -3,7 +3,7 @@ import { BASE_URL } from './constants'; // Import BASE_URL from constants file
 
 // Create an axios instance with default configuration
 const axiosInstance = axios.create({
-    baseURL: process.env.REACT_APP_API_URL || BASE_URL, // Set base URL from environment variable or fallback to BASE_URL
+    baseURL: BASE_URL, // Set base URL from environment variable or fallback to BASE_URL
     timeout: 5000, // Set timeout for requests
     headers: {
         'Content-Type': 'application/json', // Set default content type
