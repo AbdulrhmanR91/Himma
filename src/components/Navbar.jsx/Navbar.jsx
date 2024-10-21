@@ -57,6 +57,9 @@ const Navbar = ({ userInfo, onSearchNote, onTagSearch, onStatusSearch, handleCle
     setIsSearchVisible(false);
   };
 
+  // Get the current page path to hide logout in login/signup pages
+  const currentPath = window.location.pathname;
+
   return (
     <>
       <nav className="bg-white shadow-md sticky top-0 z-40">
@@ -109,9 +112,11 @@ const Navbar = ({ userInfo, onSearchNote, onTagSearch, onStatusSearch, handleCle
             </div>
 
             {/* Desktop Profile Info */}
-            <div className="hidden md:flex items-center">
-              <ProfileInfo userInfo={userInfo} onLogout={onLogout} />
-            </div>
+            {localStorage.getItem("token") && currentPath !== "/login" && currentPath !== "/signup" && (
+              <div className="hidden md:flex items-center">
+                <ProfileInfo userInfo={userInfo} onLogout={onLogout} />
+              </div>
+            )}
           </div>
         </div>
 
