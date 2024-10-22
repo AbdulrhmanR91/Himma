@@ -22,6 +22,16 @@ const Home = () => {
 
   // Function to group notes by their status
   const getGroupedNotes = () => {
+    const sortNotes = (notes) => {
+      return [...notes].sort((a, b) => {
+        // Sort by pinned status first (pinned notes come first)
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+        // If pin status is the same, sort by creation date (newest first)
+        return new Date(b.createdOn) - new Date(a.createdOn);
+      });
+    };
+
     return {
       pending: allNotes.filter(note => note.status === 'pending'),
       inProgress: allNotes.filter(note => note.status === 'in progress'),
@@ -48,7 +58,7 @@ const Home = () => {
   };
 
   // Function to show toast messages
-  const showToastMessage = (message, type) => {
+  const showToastMessage = (message, type="success") => {
     setShowToastMsg({
       isShown: true,
       message,
@@ -82,17 +92,23 @@ const Home = () => {
   };
 
   // Fetch all notes from the server
-  const getAllNotes = async () => {
-    try {
-      const response = await axiosInstance.get("/get-all-notes");
-      if (response.data && response.data.notes) {
-        setAllNotes(response.data.notes); // Set notes state
-      }
-    } catch (error) {
-      console.error("An unexpected error occurred. Please try again.");
+ // Updated getAllNotes function to sort notes when fetching
+ const getAllNotes = async () => {
+  try {
+    const response = await axiosInstance.get("/get-all-notes");
+    if (response.data && response.data.notes) {
+      // Sort notes before setting state
+      const sortedNotes = response.data.notes.sort((a, b) => {
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+        return new Date(b.createdOn) - new Date(a.createdOn);
+      });
+      setAllNotes(sortedNotes);
     }
-  };
-
+  } catch (error) {
+    console.error("An unexpected error occurred. Please try again.");
+  }
+};
   // Delete a note
   const deleteNote = async (data) => {
     const noteId = data._id; // Get the note ID
@@ -124,20 +140,37 @@ const Home = () => {
 
   // Toggle pin status of a note
   const updateIsPinned = async (noteData) => {
-    const noteId = noteData._id; // Get note ID
+    const noteId = noteData._id;
     try {
       const response = await axiosInstance.put(
         "/update-note-pinned/" + noteId,
         {
-          isPinned: !noteData.isPinned, // Toggle pin status
+          isPinned: !noteData.isPinned,
         }
       );
       if (response.data && response.data.note) {
-        showToastMessage("Task Pinned Successfully");
-        getAllNotes(); // Refresh notes after pinning
+        // Update the notes array with the new pinned status
+        setAllNotes(prevNotes => {
+          const updatedNotes = prevNotes.map(note => 
+            note._id === noteId 
+              ? { ...note, isPinned: !note.isPinned }
+              : note
+          );
+                    // Sort the notes to move pinned ones to the top
+                    return updatedNotes.sort((a, b) => {
+                      if (a.isPinned && !b.isPinned) return -1;
+                      if (!a.isPinned && b.isPinned) return 1;
+                      return new Date(b.createdOn) - new Date(a.createdOn);
+                    });
+                  });
+
+        showToastMessage(
+          `Task ${!noteData.isPinned ? "Pinned" : "Unpinned"} Successfully`
+        );
       }
     } catch (error) {
       console.error(error);
+      showToastMessage("Failed to update pin status", "error");
     }
   };
 
@@ -164,17 +197,18 @@ const Home = () => {
 
   // Change the status of a note
   const handleStatusChange = async (noteId, newStatus) => {
-    try {
+    try { 
       const response = await axiosInstance.put(`/update-note-status/${noteId}`, {
         status: newStatus
       });
       
       if (response.data && !response.data.error) {
-        showToastMessage("Task Status Updated Successfully");
+        showToastMessage("Task Status Updated Successfully","success");
         getAllNotes(); // Refresh notes after status update
       }
     } catch (error) {
       console.error("An unexpected error occurred while updating status.");
+      showToastMessage("Failed to update status", "error"); // Added error toast
     }
   };
 
@@ -225,7 +259,7 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-50 pb-24">
       <Navbar
         userInfo={userInfo}
         onSearchNote={onSearchNote}
@@ -263,25 +297,30 @@ const Home = () => {
 
       {/* Button to open the modal for adding a new note */}
       <button
-        className="fixed right-4 bottom-4 md:right-8 md:bottom-8 w-12 h-12 md:w-16 md:h-16 flex items-center justify-center rounded-full bg-teal-500 hover:bg-teal-600 transition-colors duration-300 shadow-lg"
+        className="fixed right-4 bottom-20 md:right-8 md:bottom-8 w-14 h-14 md:w-16 md:h-16 flex items-center justify-center rounded-full bg-teal-500 hover:bg-teal-600 transition-colors duration-300 shadow-lg z-50 text-white text-3xl"
         onClick={() => {
-          setOpenAddEditModel({ isShown: true, type: "add", data: null }); // Open modal for adding a note
+          setOpenAddEditModel({ isShown: true, type: "add", data: null });
         }}
       >
-        <MdAdd /> {/* Add icon */}
+        <MdAdd className="w-8 h-8" />
       </button>
 
       {/* Modal for adding/editing notes */}
       <Modal
-        className=" w-[80%] m-auto max-w-[500px]  py-8 rounded-[8px] mt-20 border-none p-[16px] bg-white"
+        className="w-[90%] md:w-[80%] m-auto max-w-[500px] py-8 rounded-[8px] mt-10 md:mt-20 border-none p-[16px] bg-white absolute top-0 left-1/2 transform -translate-x-1/2"
         isOpen={openAddEditModel.isShown}
-        onRequestClose={() => {}}
+        onRequestClose={() => {
+          setOpenAddEditModel({ isShown: false, type: "add", data: null });
+        }}
         style={{
           overlay: {
-            backgroundColor: "rgba(0, 0, 0, 0.5)", // Overlay styling
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            zIndex: 1000,
+            overflowY: "auto",
+            padding: "1rem"
           },
           content: {
-            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)", // Content shadow styling
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
           },
         }}
         contentLabel="Add/Edit Note"

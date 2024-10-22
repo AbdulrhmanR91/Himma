@@ -139,7 +139,7 @@ app.get("/get-user", authenticateToken, async (req, res) => {
 
 // Add Note route (protected by authentication)
 app.post("/add-note", authenticateToken, async (req, res) => {
-    const { title, content, tags, status } = req.body; // Destructuring request body to extract note details
+    const { title, content, tags, status , isPinned} = req.body; // Destructuring request body to extract note details
     const { user } = req.user; // Extracting user from authenticated token
 
     // Check if title and content are provided
@@ -162,6 +162,7 @@ app.post("/add-note", authenticateToken, async (req, res) => {
             content,
             tags: tags || [], // Default to empty array if no tags are provided
             status: status || "pending", // Default to "pending" if no status is provided
+            isPinned: isPinned || false, 
             userId: user._id, // Associating note with the user ID
         });
 
@@ -184,7 +185,7 @@ app.put("/edit-note/:noteId", authenticateToken, async (req, res) => {
     const { user } = req.user; // Extracting user from authenticated token
 
     // Check if any changes are provided
-    if (!title && !content && !tags) {
+    if (!title && !content && !tags && isPinned === undefined ) {
         return res.status(400).json({ error: true, message: "No changes provided" });
     }
 
@@ -321,35 +322,31 @@ app.get("/search-notes-by-tags/", authenticateToken, async (req, res) => {
 });
 
 // Update Note Status route (protected by authentication)
-app.put("/update-note-status/:noteId", authenticateToken, async (req, res) => {
+app.put("/update-note-pinned/:noteId", authenticateToken, async (req, res) => {
     const noteId = req.params.noteId; // Extracting note ID from request parameters
-    const { status } = req.body; // Destructuring request body to extract new status
+    const { isPinned } = req.body; // Destructuring request body to extract isPinned status
     const { user } = req.user; // Extracting user from authenticated token
-
-    // Validate status value
-    if (!['pending', 'in progress', 'completed'].includes(status)) {
-        return res.status(400).json({ error: true, message: "Invalid status value" });
-    }
 
     try {
         // Find the note by noteId and userId
         const note = await Note.findOne({ _id: noteId, userId: user._id });
 
         if (!note) {
-            return res.status(404).json({ error: true, message: "Note not found" }); // Returning error if note not found
+            return res.status(404).json({ error: true, message: "Note not found" });
         }
 
-        // Update the status of the note
-        note.status = status; // Updating status
-        await note.save(); // Saving updated note to the database
+        // Update the isPinned status
+        note.isPinned = isPinned;
+        await note.save();
 
         return res.json({
             error: false,
             note,
-            message: "Note status updated successfully",
+            message: "Note pin status updated successfully",
         });
     } catch (error) {
-        return res.status(500).json({ error: true, message: "Internal Server Error" }); // Handling server errors
+        console.error("Error updating note pin status:", error);
+        return res.status(500).json({ error: true, message: "Internal Server Error" });
     }
 });
 
