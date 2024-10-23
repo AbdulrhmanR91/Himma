@@ -35,81 +35,108 @@ app.get("/", (req, res) => {
     res.json({ data: "hello" }); // Responding with a simple JSON message
 });
 
+
 // Create Account route
 app.post("/create-account", async (req, res) => {
-    const { fullName, email, password } = req.body; // Destructuring request body to extract user details
+    const { fullName, email, password } = req.body;
 
-    // Check if required fields are provided
-    if (!fullName) {
-        return res.status(400).json({ error: true, message: "Full Name is required" });
-    }
-    if (!email) {
-        return res.status(400).json({ error: true, message: "Email is required" });
-    }
-    if (!password) {
-        return res.status(400).json({ error: true, message: "Password is required" });
+    // Validation checks...
+    if (!fullName || !email || !password) {
+        return res.status(400).json({ 
+            error: true, 
+            message: "All fields are required" 
+        });
     }
 
-    // Check if user already exists by email
-    const isUser = await User.findOne({ email: email }); // Searching for user by email
-    if (isUser) {
-        return res.json({ error: true, message: "User already exists" }); // Returning error if user exists
+    try {
+        // Check if user exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.json({ 
+                error: true, 
+                message: "User already exists" 
+            });
+        }
+
+        // Create new user - password will be automatically hashed by the pre-save hook
+        const user = new User({ fullName, email, password });
+        await user.save();
+
+        // Remove password from response
+        const userResponse = user.toObject();
+        delete userResponse.password;
+
+        const accessToken = jwt.sign(
+            { user: userResponse }, 
+            process.env.ACCESS_TOKEN_SECRET,
+            { expiresIn: "36000m" }
+        );
+
+        return res.json({
+            error: false,
+            user: userResponse,
+            accessToken,
+            message: "Registration Successful"
+        });
+    } catch (error) {
+        return res.status(500).json({
+            error: true,
+            message: "Error creating account"
+        });
     }
-
-    // Create a new user and save it in the database
-    const user = new User({
-        fullName,
-        email,
-        password,
-    });
-    await user.save(); // Saving new user to the database
-
-    // Generate an access token for the new user
-    const accessToken = jwt.sign({ user }, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "36000m", // Token expiration time
-    });
-
-    return res.json({
-        error: false,
-        user,
-        accessToken,
-        message: "Registration Successful",
-    });
 });
 
 // Login route
 app.post("/login", async (req, res) => {
-    const { email, password } = req.body; // Destructuring request body to extract login details
+    const { email, password } = req.body;
 
-    // Check if email and password are provided
-    if (!email) {
-        return res.status(400).json({ message: "Email is required" });
-    }
-    if (!password) {
-        return res.status(400).json({ message: "Password is required" });
-    }
-
-    // Find user by email
-    const userInfo = await User.findOne({ email: email }); // Searching for user by email
-    if (!userInfo) {
-        return res.status(400).json({ message: "User not found" }); // Returning error if user not found
-    }
-
-    // Validate credentials
-    if (userInfo.email === email && userInfo.password === password) {
-        const user = { user: userInfo }; // Creating user object for JWT
-        const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-            expiresIn: "3600m", // Token expiration time
+    if (!email || !password) {
+        return res.status(400).json({ 
+            error: true,
+            message: "Email and password are required" 
         });
+    }
+
+    try {
+        // Find user
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ 
+                error: true,
+                message: "User not found" 
+            });
+        }
+
+        // Compare passwords
+        const isMatch = await user.comparePassword(password);
+        if (!isMatch) {
+            return res.status(400).json({ 
+                error: true,
+                message: "Invalid credentials" 
+            });
+        }
+
+        // Remove password from response
+        const userResponse = user.toObject();
+        delete userResponse.password;
+
+        const accessToken = jwt.sign(
+            { user: userResponse }, 
+            process.env.ACCESS_TOKEN_SECRET,
+            { expiresIn: "3600m" }
+        );
 
         return res.json({
             error: false,
             message: "Login successful",
             email,
-            accessToken, // Returning access token on successful login
+            accessToken
         });
-    } else {
-        return res.status(400).json({ error: true, message: "Invalid credentials" }); // Returning error for invalid credentials
+    } catch (error) {
+        return res.status(500).json({
+            error: true,
+            message: "Error during login"
+        });
     }
 });
 
@@ -321,6 +348,34 @@ app.get("/search-notes-by-tags/", authenticateToken, async (req, res) => {
     }
 });
 
+app.put("/update-note-status/:noteId", authenticateToken, async (req, res) => {
+    const noteId = req.params.noteId;
+    const { status } = req.body;
+    const { user } = req.user;
+
+    if (!status || !['pending', 'in progress', 'completed'].includes(status.toLowerCase())) {
+        return res.status(400).json({ error: true, message: "Invalid status" });
+    }
+
+    try {
+        const note = await Note.findOne({ _id: noteId, userId: user._id });
+        if (!note) {
+            return res.status(404).json({ error: true, message: "Note not found" });
+        }
+
+        note.status = status.toLowerCase();
+        await note.save();
+
+        return res.json({
+            error: false,
+            note,
+            message: "Note status updated successfully",
+        });
+    } catch (error) {
+        return res.status(500).json({ error: true, message: "Internal Server Error" });
+    }
+});
+
 // Update Note Status route (protected by authentication)
 app.put("/update-note-pinned/:noteId", authenticateToken, async (req, res) => {
     const noteId = req.params.noteId; // Extracting note ID from request parameters
@@ -376,6 +431,8 @@ app.get("/search-notes-by-status/", authenticateToken, async (req, res) => {
         return res.status(500).json({ error: true, message: "Internal Server Error" }); // Handling server errors
     }
 });
+
+
 
 // Start the Express server on port 8000
 app.listen(8000, () => {

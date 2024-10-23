@@ -21,21 +21,15 @@ const Home = () => {
   });
 
   // Function to group notes by their status
+  // تحسين دالة تجميع الملاحظات
   const getGroupedNotes = () => {
-    const sortNotes = (notes) => {
-      return [...notes].sort((a, b) => {
-        // Sort by pinned status first (pinned notes come first)
-        if (a.isPinned && !b.isPinned) return -1;
-        if (!a.isPinned && b.isPinned) return 1;
-        // If pin status is the same, sort by creation date (newest first)
-        return new Date(b.createdOn) - new Date(a.createdOn);
-      });
-    };
-
     return {
-      pending: allNotes.filter(note => note.status === 'pending'),
-      inProgress: allNotes.filter(note => note.status === 'in progress'),
+      pending: allNotes.filter(note => note.status === 'pending')
+        .sort((a, b) => b.isPinned - a.isPinned || new Date(b.createdOn) - new Date(a.createdOn)),
+      inProgress: allNotes.filter(note => note.status === 'in progress')
+        .sort((a, b) => b.isPinned - a.isPinned || new Date(b.createdOn) - new Date(a.createdOn)),
       completed: allNotes.filter(note => note.status === 'completed')
+        .sort((a, b) => b.isPinned - a.isPinned || new Date(b.createdOn) - new Date(a.createdOn))
     };
   };
 
@@ -49,6 +43,7 @@ const Home = () => {
   const [allNotes, setAllNotes] = useState([]); // State to hold all notes
   const [userInfo, setUserInfo] = useState(null); // State to hold user information
   const [isSearch, setIsSearch] = useState(false); // State to track search status
+  const [isLoading, setIsLoading] = useState(false); // New loading state
 
   const navigate = useNavigate(); // Initialize navigation
 
@@ -58,12 +53,17 @@ const Home = () => {
   };
 
   // Function to show toast messages
-  const showToastMessage = (message, type="success") => {
+  // تحسين دالة عرض رسائل التنبيه
+  const showToastMessage = (message, type = "success") => {
     setShowToastMsg({
       isShown: true,
       message,
       type,
     });
+    // إغلاق تلقائي بعد 3 ثواني
+    setTimeout(() => {
+      handleCloseToast();
+    }, 3000);
   };
 
   // Function to close toast messages
@@ -71,8 +71,10 @@ const Home = () => {
     setShowToastMsg({
       isShown: false,
       message: "",
+      type: "success",
     });
   };
+
 
   // Fetch user information from the server
   const getUserInfo = async () => {
@@ -93,11 +95,12 @@ const Home = () => {
 
   // Fetch all notes from the server
  // Updated getAllNotes function to sort notes when fetching
+ // تحسين دالة جلب الملاحظات
  const getAllNotes = async () => {
+  setIsLoading(true);
   try {
     const response = await axiosInstance.get("/get-all-notes");
     if (response.data && response.data.notes) {
-      // Sort notes before setting state
       const sortedNotes = response.data.notes.sort((a, b) => {
         if (a.isPinned && !b.isPinned) return -1;
         if (!a.isPinned && b.isPinned) return 1;
@@ -106,7 +109,10 @@ const Home = () => {
       setAllNotes(sortedNotes);
     }
   } catch (error) {
-    console.error("An unexpected error occurred. Please try again.");
+    console.error("Failed to fetch notes:", error);
+    showToastMessage("Failed to fetch notes", "error");
+  } finally {
+    setIsLoading(false);
   }
 };
   // Delete a note
@@ -196,19 +202,46 @@ const Home = () => {
   };
 
   // Change the status of a note
-  const handleStatusChange = async (noteId, newStatus) => {
-    try { 
+   // تحسين دالة تحديث الحالة
+   const handleStatusChange = async (noteId, newStatus) => {
+    setIsLoading(true);
+    try {
+      // تحديث مؤقت في واجهة المستخدم أولاً للاستجابة السريعة
+      setAllNotes(prevNotes => 
+        prevNotes.map(note => 
+          note._id === noteId ? { ...note, status: newStatus } : note
+        )
+      );
+
+      // إرسال الطلب إلى الخادم
       const response = await axiosInstance.put(`/update-note-status/${noteId}`, {
         status: newStatus
       });
-      
+
       if (response.data && !response.data.error) {
-        showToastMessage("Task Status Updated Successfully","success");
-        getAllNotes(); // Refresh notes after status update
+        showToastMessage("Task Status Updated Successfully");
+        // تحديث القائمة كاملة للتأكد من التزامن
+        getAllNotes();
+      } else {
+        // إعادة الحالة السابقة في حالة الفشل
+        setAllNotes(prevNotes => 
+          prevNotes.map(note => 
+            note._id === noteId ? { ...note, status: note.status } : note
+          )
+        );
+        showToastMessage("Failed to update status", "error");
       }
     } catch (error) {
-      console.error("An unexpected error occurred while updating status.");
-      showToastMessage("Failed to update status", "error"); // Added error toast
+      console.error("Error updating status:", error);
+      showToastMessage("Task Status Updated Successfully", "success");
+      // إعادة الحالة السابقة في حالة الفشل
+      setAllNotes(prevNotes => 
+        prevNotes.map(note => 
+          note._id === noteId ? { ...note, status: note.status } : note
+        )
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -222,7 +255,10 @@ const Home = () => {
   // Render notes grouped by status
   const renderStatusSection = (title, notes) => (
     <div className="mb-8">
-      <h2 className="text-xl font-semibold mb-4 text-gray-700">{title}</h2>
+      <h2 className="text-xl font-semibold mb-4 text-gray-700 flex items-center">
+        {title}
+        <span className="ml-2 text-sm text-gray-500">({notes.length})</span>
+        </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {notes.map((item) => (
           <NoteCard
@@ -268,28 +304,31 @@ const Home = () => {
         handleClearSearch={handleClearSearch}
       />
 
-      <div className="container mx-auto px-4 py-8">
-        {allNotes.length > 0 ? ( // Check if there are any notes to display
+<div className="container mx-auto px-4 py-8">
+        {isLoading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500"></div>
+          </div>
+        ) : allNotes.length > 0 ? (
           <div>
             {(() => {
-              const { inProgress, pending, completed } = getGroupedNotes(); // Group notes by status
+              const { inProgress, pending, completed } = getGroupedNotes();
               return (
                 <>
-                  {inProgress.length > 0 && renderStatusSection('In Progress', inProgress)} {/* Render In Progress section */}
-                  {pending.length > 0 && renderStatusSection('Pending', pending)} {/* Render Pending section */}
-                  {completed.length > 0 && renderStatusSection('Completed', completed)} {/* Render Completed section */}
+                  {inProgress.length > 0 && renderStatusSection('In Progress', inProgress)}
+                  {pending.length > 0 && renderStatusSection('Pending', pending)}
+                  {completed.length > 0 && renderStatusSection('Completed', completed)}
                 </>
               );
             })()}
           </div>
         ) : (
-          // Display EmptyNotes component if there are no notes
           <EmptyNotes
-            imgSrc={isSearch ? NoDataImg : AddNotesImg} // Choose image based on search status
+            imgSrc={isSearch ? NoDataImg : AddNotesImg}
             message={
               isSearch
-                ? "Oops! No Tasks found" // Message for no tasks found
-                : "Click the 'Add' Button to jot down your ideas, thoughts, and reminders. Let's get started!" // Message for encouraging note addition
+                ? "No Tasks found matching your search"
+                : "Click the 'Add' Button to create your first task!"
             }
           />
         )}

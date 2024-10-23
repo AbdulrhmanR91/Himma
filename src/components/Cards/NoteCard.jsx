@@ -29,70 +29,72 @@ const NoteCard = ({
     }
   };
 
-  return (
-    // Note card container with styles for hover effects and layout
-    <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
-      <div className="p-4">
-        {/* Header section with title, date, and pin button */}
-        <div className="flex items-center justify-between mb-2">
-          <div>
-            <h6 className="text-lg font-semibold text-gray-800">{title}</h6>
-            <span className="text-xs text-gray-500">{moment(date).format("DD MMM YYYY")}</span>
-          </div>
-          {/* Pin button to toggle pinned state */}
-          <button
-            onClick={onPinNote}
-            className={`p-1 rounded-full ${isPinned ? 'bg-teal-100 text-teal-600' : 'bg-gray-100 text-gray-400'} hover:bg-teal-200 transition-colors duration-200`}
-          >
-            <MdOutlinePushPin className="text-xl" />
-          </button>
-        </div>
+// Function to handle status change
+  const handleStatusChange = (e) => {
+      const newStatus = e.target.value;
+      onStatusChange(newStatus);
+    };
 
-        {/* Note content and description */}
-        <p className="text-sm text-gray-600 mb-3 line-clamp-3">{content}</p>
-
-        {/* Section for displaying tags and status dropdown */}
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col gap-2">
-            {/* Tag section */}
-            <div className="flex flex-wrap gap-1">
-              {tags.map((tag, index) => (
-                <span key={index} className="text-xs bg-teal-100 text-teal-800 px-2 py-1 rounded">
-                  #{tag}
-                </span>
-              ))}
+    return (
+      <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+        <div className="p-4">
+          {/* رأس البطاقة */}
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <h6 className="text-lg font-semibold text-gray-800">{title}</h6>
+              <span className="text-xs text-gray-500">{moment(date).format("DD MMM YYYY")}</span>
             </div>
-            {/* Dropdown to change note status */}
-            <select
-              value={status}
-              onChange={(e) => onStatusChange(e.target.value)}
-              className={`text-xs px-2 py-1 rounded border-none cursor-pointer ${getStatusColor(status)}`}
+            <button
+              onClick={onPinNote}
+              className={`p-1 rounded-full ${isPinned ? 'bg-teal-100 text-teal-600' : 'bg-gray-100 text-gray-400'} hover:bg-teal-200 transition-colors duration-200`}
             >
-              <option value="pending">Pending</option>
-              <option value="in progress">In Progress</option>
-              <option value="completed">Completed</option>
-            </select>
+              <MdOutlinePushPin className="text-xl" />
+            </button>
           </div>
-
-          {/* Action buttons for editing and deleting the note */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={onEdit}
-              className="p-1 rounded-full bg-gray-100 text-gray-600 hover:bg-teal-100 hover:text-teal-600 transition-colors duration-200"
-            >
-              <MdCreate className="text-xl" />
-            </button>
-            <button
-              onClick={onDelete}
-              className="p-1 rounded-full bg-gray-100 text-gray-600 hover:bg-red-100 hover:text-red-600 transition-colors duration-200"
-            >
-              <MdDelete className="text-xl" />
-            </button>
+  
+          {/* محتوى المهمة */}
+          <p className="text-sm text-gray-600 mb-3 line-clamp-3">{content}</p>
+  
+          {/* قسم العلامات والحالة */}
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2">
+              <div className="flex flex-wrap gap-1">
+                {tags.map((tag, index) => (
+                  <span key={index} className="text-xs bg-teal-100 text-teal-800 px-2 py-1 rounded">
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+              {/* قائمة تحديث الحالة */}
+              <select
+                value={status}
+                onChange={handleStatusChange}
+                className={`text-xs px-2 py-1 rounded cursor-pointer ${getStatusColor(status)}`}
+              >
+                <option value="pending">Pending</option>
+                <option value="in progress">In Progress</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+  
+            {/* أزرار التحكم */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={onEdit}
+                className="p-1 rounded-full bg-gray-100 text-gray-600 hover:bg-teal-100 hover:text-teal-600 transition-colors duration-200"
+              >
+                <MdCreate className="text-xl" />
+              </button>
+              <button
+                onClick={onDelete}
+                className="p-1 rounded-full bg-gray-100 text-gray-600 hover:bg-red-100 hover:text-red-600 transition-colors duration-200"
+              >
+                <MdDelete className="text-xl" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-};
-
+    );
+  };
 export default NoteCard;
